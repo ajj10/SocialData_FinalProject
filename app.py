@@ -1,18 +1,10 @@
 import pandas as pd
-import matplotlib
 import numpy as np
-import matplotlib.pyplot as plt
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
-from jupyter_dash import JupyterDash
 import plotly.express as px
-import folium
-import folium.plugins as plugins
-
-import warnings
-warnings.filterwarnings('ignore')
 
 #collisions_df_original1 = pd.read_csv("Motor_Vehicle_Collisions_-_Crashes.csv", sep=',', error_bad_lines=False, index_col=False, dtype='unicode')
 
