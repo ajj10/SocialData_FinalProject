@@ -142,7 +142,8 @@ options = contributing_factors1['BOROUGH'].unique()
 brh_options = np.append(options, ['All Boroughs'], axis=0)
 Borough = 'All Boroughs'
 
-app = JupyterDash(__name__)
+app = dash.Dash(__name__)
+server = app.server
 
 # assume you have a "long-form" data frame
 # see https://plotly.com/python/px-arguments/ for more options
@@ -275,7 +276,7 @@ def update_heatmap(weight):
     return fig
     
 
-app.run_server(mode='external', port=2000)
+#app.run_server(mode='external', port=2000)
 #app.run_server(mode='inline')
-#if __name__ == '__main__':
-#    app.run_server(debug=True)
+if __name__ == '__main__':
+    app.run_server()
