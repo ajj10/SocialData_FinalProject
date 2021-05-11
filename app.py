@@ -6,12 +6,12 @@ import dash_html_components as html
 import plotly.graph_objs as go
 import plotly.express as px
 
-#collisions_df_original1 = pd.read_csv("Motor_Vehicle_Collisions_-_Crashes.csv", sep=',', error_bad_lines=False, index_col=False, dtype='unicode')
+collisions_df_original1 = pd.read_csv("Motor_Vehicle_Collisions_-_Crashes.csv", sep=',', error_bad_lines=False, index_col=False, dtype='unicode')
 
-url = "https://data.cityofnewyork.us/resource/h9gi-nx95.json"
-collisions_df_original1 = pd.read_json(url, dtype='unicode')
-collisions_df_original1.columns = [x.upper() for x in collisions_df_original1.columns]
-collisions_df_original1.columns = collisions_df_original1.columns.str.replace("_", " ")
+#url = "https://data.cityofnewyork.us/resource/h9gi-nx95.json"
+#collisions_df_original1 = pd.read_json(url, dtype='unicode')
+#collisions_df_original1.columns = [x.upper() for x in collisions_df_original1.columns]
+#collisions_df_original1.columns = collisions_df_original1.columns.str.replace("_", " ")
 
 contributing_factors1 = collisions_df_original1[['CONTRIBUTING FACTOR VEHICLE 1', 'BOROUGH', 'NUMBER OF PERSONS INJURED', 'NUMBER OF PERSONS KILLED']]
 
