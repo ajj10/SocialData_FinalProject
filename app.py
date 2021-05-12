@@ -9,14 +9,14 @@ import plotly.express as px
 import warnings
 warnings.filterwarnings('ignore')
 
-contributing_factors_ALL_top = pd.read_json('contributing_factors_ALL_top.json')
-contributing_factors_BRONX_top = pd.read_json('contributing_factors_BRONX_top.json')
-contributing_factors_BROOKLYN_top = pd.read_json('contributing_factors_BROOKLYN_top.json')
-contributing_factors_MANHATTAN_top = pd.read_json('contributing_factors_MANHATTAN_top.json')
-contributing_factors_QUEENS_top = pd.read_json('contributing_factors_QUEENS_top.json')
-contributing_factors_STATENISLAND_top = pd.read_json('contributing_factors_STATENISLAND_top.json')
+contributing_factors_ALL_top = pd.read_json('data/contributing_factors_ALL_top.json')
+contributing_factors_BRONX_top = pd.read_json('data/contributing_factors_BRONX_top.json')
+contributing_factors_BROOKLYN_top = pd.read_json('data/contributing_factors_BROOKLYN_top.json')
+contributing_factors_MANHATTAN_top = pd.read_json('data/contributing_factors_MANHATTAN_top.json')
+contributing_factors_QUEENS_top = pd.read_json('data/contributing_factors_QUEENS_top.json')
+contributing_factors_STATENISLAND_top = pd.read_json('data/contributing_factors_STATENISLAND_top.json')
 
-data_3 = pd.read_json('data_3.json')
+data_3 = pd.read_json('data/data_3.json')
 
 # Dash graph
 
