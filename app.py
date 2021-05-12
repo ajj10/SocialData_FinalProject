@@ -18,9 +18,16 @@ contributing_factors_MANHATTAN_top = pd.read_json('data/contributing_factors_MAN
 contributing_factors_QUEENS_top = pd.read_json('data/contributing_factors_QUEENS_top.json')
 contributing_factors_STATENISLAND_top = pd.read_json('data/contributing_factors_STATENISLAND_top.json')
 
+contributing_factors_BRONX_top7 = pd.read_json('data/contributing_factors_BRONX_top7.json')
+contributing_factors_BROOKLYN_top7 = pd.read_json('data/contributing_factors_BROOKLYN_top7.json')
+contributing_factors_MANHATTAN_top7 = pd.read_json('data/contributing_factors_MANHATTAN_top7.json')
+contributing_factors_QUEENS_top7 = pd.read_json('data/contributing_factors_QUEENS_top7.json')
+contributing_factors_STATENISLAND_top7 = pd.read_json('data/contributing_factors_STATENISLAND_top7.json')
+
 data_3 = pd.read_json('data/data_3.json')
 
 brh_options = ['BROOKLYN', 'MANHATTAN', 'BRONX', 'STATEN ISLAND', 'QUEENS', 'All Boroughs']
+severity_options = ['Total collisions', 'Injured', 'Killed']
 
 
 #------------------Dash app-----------------#
@@ -72,6 +79,29 @@ app.layout = html.Div([
                     'padding-top': '20px', 
                     'padding-bottom': '20px'}),
 
+    # Dropdown menu for Collisions, injured, killed
+    html.Div(dcc.Dropdown(
+            id='Severity',
+            options=[{
+                'label': i,
+                'value': i
+            } for i in severity_options],
+            value='Total collisions'),
+            style={'width': '25%',
+                   'margin-left': '10%'}),
+
+    # interactive collision bar chart
+    html.Div(dcc.Graph(
+        id='collision-graph2'
+    ),  style={'width': '80%',
+                'margin-left': 'auto', 
+                'margin-right': 'auto',
+                'position': 'relative'}),
+    
+    html.Div(children='''
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac.
+    ''', style={'width': '80%','margin-left': 'auto', 'margin-right': 'auto', 'padding-top': '20px', 'padding-bottom': '20px'}),
+
     html.H2('Heat Map that shows collisions by time of day', style={'text-align': 'center'}),
     
     # Heatmap
@@ -92,7 +122,17 @@ app.layout = html.Div([
         step=None
     ), style={'width': '70%',
               'margin-left': 'auto', 
-              'margin-right': 'auto'})
+              'margin-right': 'auto'}),
+    
+
+    html.Div(children='''
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
+        Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et malesuada justo. Ut bibendum lacinia luctus. Ut accumsan ex eu enim sagittis, nec sollicitudin mauris porttitor. Sed maximus neque id magna cursus, et varius purus sagittis. Fusce dolor ligula, pretium posuere urna eu, ullamcorper semper elit. Morbi elementum sagittis tortor, ut blandit ante rhoncus at. Ut porttitor eu dui nec iaculis. Maecenas ut sem a sapien maximus semper. Suspendisse massa urna, cursus vitae euismod non, dapibus id eros. Duis quis nisl ac sem condimentum tincidunt et vitae odio. Nam ut gravida eros. Donec molestie, justo et auctor fermentum, ipsum erat mattis velit, id tempor ipsum libero non ligula.
+        ''', style={'width': '80%',
+                    'margin-left': 'auto', 
+                    'margin-right': 'auto', 
+                    'padding-top': '20px', 
+                    'padding-bottom': '20px'}),
 ])
 
 ## update bar chart when changing Boroughs
@@ -135,6 +175,42 @@ def update_graph(Borough):
         'layout':
         go.Layout(barmode='stack', height=520, xaxis=dict(automargin=True))
     }
+
+@app.callback(
+    dash.dependencies.Output('collision-graph2', 'figure'),
+    [dash.dependencies.Input('Severity', 'value')])
+def update_graph(Severity):
+    if Severity == 'Total collisions':
+        fig = go.Figure(data=[
+            go.Bar(name='BRONX', x=contributing_factors_BRONX_top7['COUNTS'].index, y=contributing_factors_BRONX_top7['COUNTS']),
+            go.Bar(name='BROOKLYN', x=contributing_factors_BROOKLYN_top7['COUNTS'].index, y=contributing_factors_BROOKLYN_top7['COUNTS']),
+            go.Bar(name='MANHATTAN', x=contributing_factors_MANHATTAN_top7['COUNTS'].index, y=contributing_factors_MANHATTAN_top7['COUNTS']),
+            go.Bar(name='QUEENS', x=contributing_factors_QUEENS_top7['COUNTS'].index, y=contributing_factors_QUEENS_top7['COUNTS']),
+            go.Bar(name='STATENISLAND', x=contributing_factors_STATENISLAND_top7['COUNTS'].index, y=contributing_factors_STATENISLAND_top7                  ['COUNTS']),
+        ])
+
+    elif Severity == 'Injured':
+        fig = go.Figure(data=[
+            go.Bar(name='BRONX', x=contributing_factors_BRONX_top7['COUNTS'].index, y=contributing_factors_BRONX_top7['NUMBER OF PERSONS INJURED']),
+            go.Bar(name='BROOKLYN', x=contributing_factors_BROOKLYN_top7['COUNTS'].index, y=contributing_factors_BROOKLYN_top7['NUMBER OF PERSONS INJURED']),
+            go.Bar(name='MANHATTAN', x=contributing_factors_MANHATTAN_top7['COUNTS'].index, y=contributing_factors_MANHATTAN_top7['NUMBER OF PERSONS INJURED']),
+            go.Bar(name='QUEENS', x=contributing_factors_QUEENS_top7['COUNTS'].index, y=contributing_factors_QUEENS_top7['NUMBER OF PERSONS INJURED']),
+            go.Bar(name='STATENISLAND', x=contributing_factors_STATENISLAND_top7['COUNTS'].index, y=contributing_factors_STATENISLAND_top7  ['NUMBER OF PERSONS INJURED']),
+        ])
+
+    elif Severity == 'Killed':
+        fig = go.Figure(data=[
+            go.Bar(name='BRONX', x=contributing_factors_BRONX_top7['COUNTS'].index, y=contributing_factors_BRONX_top7['NUMBER OF PERSONS KILLED']),
+            go.Bar(name='BROOKLYN', x=contributing_factors_BROOKLYN_top7['COUNTS'].index, y=contributing_factors_BROOKLYN_top7['NUMBER OF PERSONS KILLED']),
+            go.Bar(name='MANHATTAN', x=contributing_factors_MANHATTAN_top7['COUNTS'].index, y=contributing_factors_MANHATTAN_top7['NUMBER OF PERSONS KILLED']),
+            go.Bar(name='QUEENS', x=contributing_factors_QUEENS_top7['COUNTS'].index, y=contributing_factors_QUEENS_top7['NUMBER OF PERSONS KILLED']),
+            go.Bar(name='STATENISLAND', x=contributing_factors_STATENISLAND_top7['COUNTS'].index, y=contributing_factors_STATENISLAND_top7    ['NUMBER OF PERSONS KILLED']),
+        ])
+
+    fig.update_layout(barmode='group', height=520, xaxis=dict(automargin=True))
+    fig.update_traces(hovertemplate="%{y}")
+
+    return fig
     
 
 ## update heatmap when using slider
