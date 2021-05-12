@@ -16,7 +16,7 @@ url = "https://data.cityofnewyork.us/resource/h9gi-nx95.json"
 
 collisions_df_original1 = pd.read_json(url, dtype='unicode')
 
-time.sleep(30)
+time.sleep(10)
 
 collisions_df_original1.columns = [x.upper() for x in collisions_df_original1.columns]
 collisions_df_original1.columns = collisions_df_original1.columns.str.replace("_", " ")
