@@ -5,142 +5,22 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 import plotly.express as px
-import time
 
+import warnings
+warnings.filterwarnings('ignore')
 
-#collisions_df_original1 = pd.read_csv("Motor_Vehicle_Collisions_-_Crashes.csv", sep=',', error_bad_lines=False, index_col=False, dtype='unicode')
+contributing_factors_ALL_top = pd.read_json('contributing_factors_ALL_top.json')
+contributing_factors_BRONX_top = pd.read_json('contributing_factors_BRONX_top.json')
+contributing_factors_BROOKLYN_top = pd.read_json('contributing_factors_BROOKLYN_top.json')
+contributing_factors_MANHATTAN_top = pd.read_json('contributing_factors_MANHATTAN_top.json')
+contributing_factors_QUEENS_top = pd.read_json('contributing_factors_QUEENS_top.json')
+contributing_factors_STATENISLAND_top = pd.read_json('contributing_factors_STATENISLAND_top.json')
 
-found = False
-url = "https://data.cityofnewyork.us/resource/h9gi-nx95.json"
-
-
-collisions_df_original1 = pd.read_json(url, dtype='unicode')
-
-time.sleep(10)
-
-collisions_df_original1.columns = [x.upper() for x in collisions_df_original1.columns]
-collisions_df_original1.columns = collisions_df_original1.columns.str.replace("_", " ")
-
-contributing_factors1 = collisions_df_original1[['CONTRIBUTING FACTOR VEHICLE 1', 'BOROUGH', 'NUMBER OF PERSONS INJURED', 'NUMBER OF PERSONS KILLED']]
-
-# combining and Simplifing contributing factors (from 61 -> 26)
-contributing_factors1['CONTRIBUTING FACTOR VEHICLE 1'].replace({'Texting': 'Cell Phone Usage', 'Cell Phone (hand-Held)': 'Cell Phone Usage', 'Cell Phone (hand-held)': 'Cell Phone Usage', 'Cell Phone (hands-free)': 'Cell Phone Usage', '80': 'Unspecified', '1': 'Unspecified', 'Outside Car Distraction': 'Driver Inattention/Distraction', 'Passenger Distraction': 'Driver Inattention/Distraction', 'Drugs (Illegal)': 'Drugs/Prescription Medication', 'Drugs (illegal)': 'Drugs/Prescription Medication', 'Prescription Medication': 'Drugs/Prescription Medication', 'Fatigued/Drowsy': 'Fatigued/Drowsy/Lost Consciousness/Fell Asleep', 'Fell Asleep': 'Fatigued/Drowsy/Lost Consciousness/Fell Asleep', 'Lost Consciousness': 'Fatigued/Drowsy/Lost Consciousness/Fell Asleep', 'Illnes': 'Illness/Physical Disability', 'Illness': 'Illness/Physical Disability', 'Physical Disability': 'Illness/Physical Disability', 'Glare': 'View Obstructed/Limited', 'Obstruction/Debris': 'View Obstructed/Limited', 'Windshield Inadequate': 'View Obstructed/Limited', 'Tinted Windows': 'View Obstructed/Limited', 'Lane Marking Improper/Inadequate': 'Lane Marking/Pavement Defective/Inadequate', 'Pavement Defective': 'Lane Marking/Pavement Defective/Inadequate', 'Shoulders Defective/Improper': 'Lane Marking/Pavement Defective/Inadequate', 'Reaction to Other Uninvolved Vehicle': 'Other Vehicular', 'Reaction to Uninvolved Vehicle': 'Other Vehicular', 'Passing or Lane Usage Improper': 'Passing or Lane Usage/Changing Improper/Unsafe', 'Passing Too Closely': 'Passing or Lane Usage/Changing Improper/Unsafe', 'Unsafe Lane Changing': 'Passing or Lane Usage/Changing Improper/Unsafe', 'Failure to Keep Right': 'Passing or Lane Usage/Changing Improper/Unsafe', 'Listening/Using Headphones': 'Using Headphones/other Electronic Device', 'Using On Board Navigation Device': 'Using Headphones/other Electronic Device', 'Other Electronic Device': 'Using Headphones/other Electronic Device', 'Headlights Defective': 'Vehicle Inadequate/Defective', 'Vehicle Vandalism': 'Vehicle Inadequate/Defective', 'Other Lighting Defects': 'Vehicle Inadequate/Defective', 'Tow Hitch Defective': 'Vehicle Inadequate/Defective', 'Steering Failure': 'Vehicle Inadequate/Defective', 'Brakes Defective': 'Vehicle Inadequate/Defective', 'Tire Failure/Inadequate': 'Vehicle Inadequate/Defective', 'Accelerator Defective': 'Vehicle Inadequate/Defective', 'Driver Inexperience': 'Driver Inexperience/Oversized Vehicle', 'Oversized Vehicle': 'Driver Inexperience/Oversized Vehicle', 'Traffic Control Disregarded': 'Traffic Control/Speed Limits Disregarded', 'Unsafe Speed': 'Traffic Control/Speed Limits Disregarded'}, inplace=True)
-
-contributing_factors1['COUNTS'] = 1.0
-
-# Drop all NaN Boroughs since they dont give the insight wwe need
-contributing_factors1 = contributing_factors1[contributing_factors1['BOROUGH'].notna()]
-contributing_factors_combined1 = contributing_factors1.astype({"NUMBER OF PERSONS INJURED": float, "NUMBER OF PERSONS KILLED": float})
-
-contributing_factors_combined1 = contributing_factors_combined1.groupby(['CONTRIBUTING FACTOR VEHICLE 1','BOROUGH']).agg({'NUMBER OF PERSONS INJURED': 'sum', 'NUMBER OF PERSONS KILLED': 'sum', 'COUNTS': 'sum'})
-
-contributing_factors_BRONX = contributing_factors_combined1.iloc[contributing_factors_combined1.index.get_level_values('BOROUGH') == 'BRONX']
-contributing_factors_BRONX = contributing_factors_BRONX.droplevel(1)
-contributing_factors_QUEENS = contributing_factors_combined1.iloc[contributing_factors_combined1.index.get_level_values('BOROUGH') == 'QUEENS']
-contributing_factors_QUEENS = contributing_factors_QUEENS.droplevel(1)
-contributing_factors_BROOKLYN = contributing_factors_combined1.iloc[contributing_factors_combined1.index.get_level_values('BOROUGH') == 'BROOKLYN']
-contributing_factors_BROOKLYN = contributing_factors_BROOKLYN.droplevel(1)
-contributing_factors_MANHATTAN = contributing_factors_combined1.iloc[contributing_factors_combined1.index.get_level_values('BOROUGH') == 'MANHATTAN']
-contributing_factors_MANHATTAN = contributing_factors_MANHATTAN.droplevel(1)
-contributing_factors_STATENISLAND = contributing_factors_combined1.iloc[contributing_factors_combined1.index.get_level_values('BOROUGH') == 'STATEN ISLAND']
-contributing_factors_STATENISLAND = contributing_factors_STATENISLAND.droplevel(1)
-
-# Deleting unspecified since they give no insight 
-contributing_factors_BRONX = contributing_factors_BRONX.drop("Unspecified", axis=0)
-contributing_factors_QUEENS = contributing_factors_QUEENS.drop("Unspecified", axis=0)
-contributing_factors_BROOKLYN = contributing_factors_BROOKLYN.drop("Unspecified", axis=0)
-contributing_factors_MANHATTAN = contributing_factors_MANHATTAN.drop("Unspecified", axis=0)
-contributing_factors_STATENISLAND = contributing_factors_STATENISLAND.drop("Unspecified", axis=0)
-
-contributing_factors_ALL = contributing_factors_BRONX
-contributing_factors_ALL = contributing_factors_ALL.add(contributing_factors_QUEENS, fill_value=0)
-contributing_factors_ALL = contributing_factors_ALL.add(contributing_factors_BROOKLYN, fill_value=0)
-contributing_factors_ALL = contributing_factors_ALL.add(contributing_factors_MANHATTAN, fill_value=0)
-contributing_factors_ALL = contributing_factors_ALL.add(contributing_factors_STATENISLAND, fill_value=0)
-
-contributing_factors_ALL_top = contributing_factors_ALL.drop(contributing_factors_ALL[contributing_factors_ALL.COUNTS < 2000].index)
-contributing_factors_BRONX_top = contributing_factors_BRONX.drop(contributing_factors_BRONX[contributing_factors_BRONX.COUNTS < 800].index)
-contributing_factors_BROOKLYN_top = contributing_factors_BROOKLYN.drop(contributing_factors_BROOKLYN[contributing_factors_BROOKLYN.COUNTS < 1000].index)
-contributing_factors_MANHATTAN_top = contributing_factors_MANHATTAN.drop(contributing_factors_MANHATTAN[contributing_factors_MANHATTAN.COUNTS < 1000].index)
-contributing_factors_QUEENS_top = contributing_factors_QUEENS.drop(contributing_factors_QUEENS[contributing_factors_QUEENS.COUNTS < 600].index)
-contributing_factors_STATENISLAND_top = contributing_factors_STATENISLAND.drop(contributing_factors_STATENISLAND[contributing_factors_STATENISLAND.COUNTS < 100].index)
-contributing_factors_STATENISLAND_top = contributing_factors_STATENISLAND_top.drop(contributing_factors_STATENISLAND_top[contributing_factors_STATENISLAND_top.COUNTS == 197].index)
-
-collisions_df_original = collisions_df_original1
-
-#Removing Na from relevant columns
-collisions_df_original = collisions_df_original[collisions_df_original['BOROUGH'].notna()]
-collisions_df_original = collisions_df_original[collisions_df_original['LATITUDE'].notna()]
-collisions_df_original = collisions_df_original[collisions_df_original['LONGITUDE'].notna()]
-
-#Data Type conversions
-collisions_df_original['LATITUDE']=collisions_df_original['LATITUDE'].astype('float').round(3)
-collisions_df_original['LONGITUDE']=collisions_df_original['LONGITUDE'].astype('float').round(3)
- 
-collisions_df_original['NUMBER OF PERSONS INJURED']=collisions_df_original['NUMBER OF PERSONS INJURED'].fillna(0)
-collisions_df_original['NUMBER OF PERSONS INJURED']=collisions_df_original['NUMBER OF PERSONS INJURED'].astype('int')
-
-collisions_df_original['NUMBER OF PERSONS KILLED']=collisions_df_original['NUMBER OF PERSONS KILLED'].fillna(0)
-collisions_df_original['NUMBER OF PERSONS KILLED']=collisions_df_original['NUMBER OF PERSONS KILLED'].astype('int')
-
-collisions_df_original['NUMBER OF PEDESTRIANS INJURED']=collisions_df_original['NUMBER OF PEDESTRIANS INJURED'].fillna(0)
-collisions_df_original['NUMBER OF PEDESTRIANS INJURED']=collisions_df_original['NUMBER OF PEDESTRIANS INJURED'].astype('int')
-
-collisions_df_original['NUMBER OF PEDESTRIANS KILLED']=collisions_df_original['NUMBER OF PEDESTRIANS KILLED'].fillna(0)
-collisions_df_original['NUMBER OF PEDESTRIANS KILLED']=collisions_df_original['NUMBER OF PEDESTRIANS KILLED'].astype('int')
-
-collisions_df_original['NUMBER OF CYCLIST INJURED']=collisions_df_original['NUMBER OF CYCLIST INJURED'].fillna(0)
-collisions_df_original['NUMBER OF CYCLIST INJURED']=collisions_df_original['NUMBER OF CYCLIST INJURED'].astype('int')
-
-collisions_df_original['NUMBER OF CYCLIST KILLED']=collisions_df_original['NUMBER OF CYCLIST KILLED'].fillna(0)
-collisions_df_original['NUMBER OF CYCLIST KILLED']=collisions_df_original['NUMBER OF CYCLIST KILLED'].astype('int')
-
-collisions_df_original['NUMBER OF MOTORIST INJURED']=collisions_df_original['NUMBER OF MOTORIST INJURED'].fillna(0)
-collisions_df_original['NUMBER OF MOTORIST INJURED']=collisions_df_original['NUMBER OF MOTORIST INJURED'].astype('int')
-
-collisions_df_original['NUMBER OF MOTORIST KILLED']=collisions_df_original['NUMBER OF MOTORIST KILLED'].fillna(0)
-collisions_df_original['NUMBER OF MOTORIST KILLED']=collisions_df_original['NUMBER OF MOTORIST KILLED'].astype('int')
-
-
-
-#Deleting incorrect columns
-collisions_df_original = collisions_df_original[collisions_df_original['LONGITUDE']!=0.0]
-collisions_df_original = collisions_df_original[collisions_df_original['LATITUDE']!=0.0]
-
-collisions_df_original = collisions_df_original.rename(columns={"NUMBER OF PERSONS KILLED": "NUMBER_OF_PERSONS_KILLED", "NUMBER OF PERSONS INJURED": "NUMBER_OF_PERSONS_INJURED",
-                                                                "NUMBER OF PEDESTRIANS INJURED":"NUMBER_OF_PEDESTRIANS_INJURED",
-                                                                "NUMBER OF PEDESTRIANS KILLED":"NUMBER_OF_PEDESTRIANS_KILLED",
-                                                                "NUMBER OF CYCLIST INJURED":"NUMBER_OF_CYCLIST_INJURED",
-                                                                "NUMBER OF CYCLIST KILLED":"NUMBER_OF_CYCLIST_KILLED","NUMBER OF MOTORIST INJURED":"NUMBER_OF_MOTORIST_INJURED",
-                                                                "NUMBER OF MOTORIST KILLED":"NUMBER_OF_MOTORIST_KILLED"})
-
-collisions_df_original["Accident_count"] = 1
-
-#Filtering Data for a particular Year
-collisions_df_original['CRASH DATE'] = pd.to_datetime(collisions_df_original['CRASH DATE'])
-collisions_df_original['CRASH TIME'] = pd.to_datetime(collisions_df_original['CRASH TIME'])
-collisions_df_original['Year'] = collisions_df_original['CRASH DATE'].dt.year
-collisions_df_original['Month'] = collisions_df_original['CRASH DATE'].dt.month
-collisions_df_original['Hr'] = collisions_df_original['CRASH TIME'].dt.hour
-
-#Filtering on Time Period for Limited Data
-collisions_df = collisions_df_original[(collisions_df_original['Year']==2019)]
-#collisions_df = collisions_df_original[(collisions_df_original['Year']==2020) &(collisions_df_original['Month']==4)]
-
-
-# Selecting only relevant columns
-#collisions_df = collisions_df[["LATITUDE","LONGITUDE","Accident_count","NUMBER_OF_PERSONS_INJURED","NUMBER_OF_PERSONS_KILLED","NUMBER_OF_PEDESTRIANS_INJURED","NUMBER_OF_PEDESTRIANS_KILLED","NUMBER_OF_CYCLIST_INJURED","NUMBER_OF_CYCLIST_KILLED","NUMBER_OF_MOTORIST_INJURED","NUMBER_OF_MOTORIST_KILLED"]]
-
-# Create weight column, using date
-collisions_df['Weight'] = collisions_df['Hr']
-collisions_df['Weight'] = collisions_df['Weight'].astype(float)
-data_3 = collisions_df.dropna(axis=0, subset=['LONGITUDE','LATITUDE','Weight'])
-data_3 = data_3[['LONGITUDE', 'LATITUDE','Weight']]
+data_3 = pd.read_json('data_3.json')
 
 # Dash graph
-options = contributing_factors1['BOROUGH'].unique()
-brh_options = np.append(options, ['All Boroughs'], axis=0)
-Borough = 'All Boroughs'
+
+brh_options = ['BROOKLYN', 'MANHATTAN', 'BRONX', 'STATEN ISLAND', 'QUEENS', 'All Boroughs']
 
 app = dash.Dash(__name__)
 server = app.server
