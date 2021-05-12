@@ -1,3 +1,4 @@
+#-------------------Imports--------------#
 import pandas as pd
 import numpy as np
 import dash
@@ -5,10 +6,11 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 import plotly.express as px
-
 import warnings
 warnings.filterwarnings('ignore')
 
+
+#-------------------Variables--------------#
 contributing_factors_ALL_top = pd.read_json('data/contributing_factors_ALL_top.json')
 contributing_factors_BRONX_top = pd.read_json('data/contributing_factors_BRONX_top.json')
 contributing_factors_BROOKLYN_top = pd.read_json('data/contributing_factors_BROOKLYN_top.json')
@@ -18,16 +20,12 @@ contributing_factors_STATENISLAND_top = pd.read_json('data/contributing_factors_
 
 data_3 = pd.read_json('data/data_3.json')
 
-# Dash graph
-
 brh_options = ['BROOKLYN', 'MANHATTAN', 'BRONX', 'STATEN ISLAND', 'QUEENS', 'All Boroughs']
 
+
+#------------------Dash app-----------------#
 app = dash.Dash(__name__)
 server = app.server
-
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-
 
 app.layout = html.Div([
     html.H1('Vehicle Collisions in New York City', style={'text-align': 'center'}),
@@ -46,46 +44,45 @@ app.layout = html.Div([
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac.
     ''', style={'width': '80%','margin-left': 'auto', 'margin-right': 'auto', 'padding-top': '20px', 'padding-bottom': '20px'}),
 
-    html.Div(
-        [
-            dcc.Dropdown(
-                id='Borough',
-                options=[{
-                    'label': i,
-                    'value': i
-                } for i in brh_options],
-                value='All Boroughs'),
-        ],
-        style={'width': '25%',
-               'margin-left': '10%'}),
+    # Dropdown menu for Boroughs
+    html.Div(dcc.Dropdown(
+            id='Borough',
+            options=[{
+                'label': i,
+                'value': i
+            } for i in brh_options],
+            value='All Boroughs'),
+            style={'width': '25%',
+                   'margin-left': '10%'}),
 
-    dcc.Graph(id='collision-graph1',
-              style={'width': '80%',
-                     'margin-left': 'auto', 
-                     'margin-right': 'auto',
-                     'position': 'relative'}),
+    # interactive collision bar chart
+    html.Div(dcc.Graph(
+        id='collision-graph1'
+    ),  style={'width': '80%',
+                'margin-left': 'auto', 
+                'margin-right': 'auto',
+                'position': 'relative'}),
     
     html.Div(children='''
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
-
-Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et malesuada justo. Ut bibendum lacinia luctus. Ut accumsan ex eu enim sagittis, nec sollicitudin mauris porttitor. Sed maximus neque id magna cursus, et varius purus sagittis. Fusce dolor ligula, pretium posuere urna eu, ullamcorper semper elit. Morbi elementum sagittis tortor, ut blandit ante rhoncus at. Ut porttitor eu dui nec iaculis. Maecenas ut sem a sapien maximus semper. Suspendisse massa urna, cursus vitae euismod non, dapibus id eros. Duis quis nisl ac sem condimentum tincidunt et vitae odio. Nam ut gravida eros. Donec molestie, justo et auctor fermentum, ipsum erat mattis velit, id tempor ipsum libero non ligula.
-    ''', style={'width': '80%',
-                'margin-left': 'auto', 
-                'margin-right': 'auto', 
-                'padding-top': '20px', 
-                'padding-bottom': '20px'}),
+        Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et malesuada justo. Ut bibendum lacinia luctus. Ut accumsan ex eu enim sagittis, nec sollicitudin mauris porttitor. Sed maximus neque id magna cursus, et varius purus sagittis. Fusce dolor ligula, pretium posuere urna eu, ullamcorper semper elit. Morbi elementum sagittis tortor, ut blandit ante rhoncus at. Ut porttitor eu dui nec iaculis. Maecenas ut sem a sapien maximus semper. Suspendisse massa urna, cursus vitae euismod non, dapibus id eros. Duis quis nisl ac sem condimentum tincidunt et vitae odio. Nam ut gravida eros. Donec molestie, justo et auctor fermentum, ipsum erat mattis velit, id tempor ipsum libero non ligula.
+        ''', style={'width': '80%',
+                    'margin-left': 'auto', 
+                    'margin-right': 'auto', 
+                    'padding-top': '20px', 
+                    'padding-bottom': '20px'}),
 
     html.H2('Heat Map that shows collisions by time of day', style={'text-align': 'center'}),
     
+    # Heatmap
     html.Div(dcc.Graph(
         id='heatmap-graph-time',
-        #figure=fig
     ), style={'width': '80%',
               'margin-left': 'auto', 
               'margin-right': 'auto', 
               'padding-bottom':'20px'}),
 
-
+    ## Slider for heatmap
     html.Div(dcc.Slider(
         id='crossfilter-hour-slider',
         min=data_3['Weight'].min(),
@@ -98,7 +95,7 @@ Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et 
               'margin-right': 'auto'})
 ])
 
-
+## update bar chart when changing Boroughs
 @app.callback(
     dash.dependencies.Output('collision-graph1', 'figure'),
     [dash.dependencies.Input('Borough', 'value')])
@@ -139,6 +136,8 @@ def update_graph(Borough):
         go.Layout(barmode='stack', height=520, xaxis=dict(automargin=True))
     }
     
+
+## update heatmap when using slider
 @app.callback(
     dash.dependencies.Output('heatmap-graph-time', 'figure'),
     [dash.dependencies.Input('crossfilter-hour-slider', 'value')])
@@ -149,14 +148,14 @@ def update_heatmap(weight):
                         center=dict(lat=40.7812, lon=-73.9665), zoom=10, opacity=0.5,
                         mapbox_style="stamen-toner", height=500)
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    fig.update(layout_coloraxis_showscale=False)
-    fig.update_traces(hovertemplate=None, hoverinfo='skip')
-    fig.update_layout(uirevision=True)
+    fig.update(layout_coloraxis_showscale=False) # turn off coloraxis (legend)
+    fig.update_traces(hovertemplate=None, hoverinfo='skip') # turn off hoverdata
+    fig.update_layout(uirevision=True) # Keep zoom on update
 
     return fig
     
 
-#app.run_server(mode='external', port=2000)
-#app.run_server(mode='inline')
+
+#----------------run server-------------------#
 if __name__ == '__main__':
     app.run_server()
