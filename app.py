@@ -25,9 +25,20 @@ contributing_factors_QUEENS_top7 = pd.read_json('data/contributing_factors_QUEEN
 contributing_factors_STATENISLAND_top7 = pd.read_json('data/contributing_factors_STATENISLAND_top7.json')
 
 data_3 = pd.read_json('data/data_3.json')
+heatmap_data = pd.read_json('data/heatmap_data.json')
 
 brh_options = ['BROOKLYN', 'MANHATTAN', 'BRONX', 'STATEN ISLAND', 'QUEENS', 'All Boroughs']
 severity_options = ['Total collisions', 'Injured', 'Killed']
+
+#Filtering Data 
+heatmap_data['CRASH DATE'] = pd.to_datetime(heatmap_data['CRASH DATE'])
+heatmap_data['CRASH TIME'] = pd.to_datetime(heatmap_data['CRASH TIME'])
+heatmap_data['Year'] = heatmap_data['CRASH DATE'].dt.year
+heatmap_data['Month'] = heatmap_data['CRASH DATE'].dt.month
+heatmap_data['Week'] = heatmap_data['CRASH DATE'].dt.week
+heatmap_data['WeekDay'] = heatmap_data['CRASH DATE'].dt.weekday
+heatmap_data['Hr'] = heatmap_data['CRASH TIME'].dt.hour
+
 
 
 #------------------Dash app-----------------#
