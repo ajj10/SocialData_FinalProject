@@ -280,7 +280,7 @@ app.layout = html.Div([
         ], style={'width': '90%', 'display': 'inline-flex', 'justify-content':'center'}),
     ],style={'margin-left': '20%','margin-right': '10%'}),
     
-
+    # Some text
     html.Div(children='''
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
         Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et malesuada justo. Ut bibendum lacinia luctus. Ut accumsan ex eu enim sagittis, nec sollicitudin mauris porttitor. Sed maximus neque id magna cursus, et varius purus sagittis. Fusce dolor ligula, pretium posuere urna eu, ullamcorper semper elit. Morbi elementum sagittis tortor, ut blandit ante rhoncus at. Ut porttitor eu dui nec iaculis. Maecenas ut sem a sapien maximus semper. Suspendisse massa urna, cursus vitae euismod non, dapibus id eros. Duis quis nisl ac sem condimentum tincidunt et vitae odio. Nam ut gravida eros. Donec molestie, justo et auctor fermentum, ipsum erat mattis velit, id tempor ipsum libero non ligula.
@@ -289,6 +289,100 @@ app.layout = html.Div([
                     'margin-right': 'auto', 
                     'padding-top': '20px', 
                     'padding-bottom': '20px'}),
+    
+
+    #labels for drop down menus
+    html.Div(children=[
+        html.Div([
+            html.Label(['Select Borough'], style={'font-weight': 'bold', "text-align": "right"}),
+        ], style={'width': '25%', 'display': 'inline-flex', 'justify-content':'center'}),
+        html.Div([
+            html.Label(['Select Year'], style={'font-weight': 'bold', "text-align": "center"}),
+        ], style={'width': '25%', 'display': 'inline-flex', 'justify-content':'center'}),
+        html.Div([
+            html.Label(['Select Week'], style={'font-weight': 'bold', "text-align": "center"}),
+        ], style={'width': '25%', 'display': 'inline-flex', 'justify-content':'center'}),
+        html.Div([
+            html.Label(['Select Weekday'], style={'font-weight': 'bold',"text-align": "left"}),
+        ], style={'width': '25%', 'display': 'inline-flex', 'justify-content':'center'}),
+    ],style={'margin-left': '10%','margin-right': '10%'}),
+
+
+    #Dropdown menus for point map
+    html.Div(children=[
+        #Dropdown menu for Borough
+        html.Div(
+            dcc.Dropdown(
+            id='borough_pointmap',
+            options=[{
+                'label': i,
+                'value': i
+            } for i in borough_options],
+            value='MANHATTAN',  
+            multi=True),
+            style={'width': '25%', 'display': 'inline-block'}
+        ),
+        #Dropdown menu for year
+        html.Div(dcc.Dropdown(
+            id='year_pointmap',
+            options=[{
+                'label': i,
+                'value': i
+            } for i in year_options],
+            value='2019',  
+            multi=True),
+            style={'width': '25%', 'display': 'inline-block'}
+        ),
+        #Dropdown menu for Week
+        html.Div(dcc.Dropdown(
+            id='week_pointmap',
+            options=[{
+                'label': i,
+                'value': i
+            } for i in week_options],
+            value=['1', '2','3', '4'],  
+            multi=True),
+            style={'width': '25%', 'display': 'inline-block'}
+        ),
+        #Dropdown menu for weekday
+        html.Div(dcc.Dropdown(
+            id='day_pointmap',
+            options=[
+                {'label': 'Monday', 'value': '0'},
+                {'label': 'Tuesday', 'value': '1'},
+                {'label': 'Wednesday', 'value': '2'},
+                {'label': 'Thursday', 'value': '3'},
+                {'label': 'Friday', 'value': '4'},
+                {'label': 'Saturday', 'value': '5'},
+                {'label': 'Sunday', 'value': '6'}
+            ],
+            value=['0', '1', '2', '3', '4', '5','6'],  
+            multi=True),
+            style={'width': '25%',  'display': 'inline-block'}
+        ),
+        html.Label(['Type a street name:'], style={'font-weight': 'bold',"text-align": "left", 'padding-right':'10px'}),
+        dcc.Input(id="type_input", type="text", placeholder="Type something...", style={'padding-top':'10px'})
+    ], style={'margin-left': '10%', 
+              'margin-right': '10%', 
+              'padding-bottom':'20px'}),
+
+    # Pointmap
+    html.Div(dcc.Graph(
+        id='pointmap-graph',
+    ), style={'width': '80%',
+              'margin-left': 'auto', 
+              'margin-right': 'auto', 
+              'padding-bottom':'20px'}),
+
+    # Some text
+    html.Div(children='''
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
+        Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et malesuada justo. Ut bibendum lacinia luctus. Ut accumsan ex eu enim sagittis, nec sollicitudin mauris porttitor. Sed maximus neque id magna cursus, et varius purus sagittis. Fusce dolor ligula, pretium posuere urna eu, ullamcorper semper elit. Morbi elementum sagittis tortor, ut blandit ante rhoncus at. Ut porttitor eu dui nec iaculis. Maecenas ut sem a sapien maximus semper. Suspendisse massa urna, cursus vitae euismod non, dapibus id eros. Duis quis nisl ac sem condimentum tincidunt et vitae odio. Nam ut gravida eros. Donec molestie, justo et auctor fermentum, ipsum erat mattis velit, id tempor ipsum libero non ligula.
+        ''', style={'width': '80%',
+                    'margin-left': 'auto', 
+                    'margin-right': 'auto', 
+                    'padding-top': '20px', 
+                    'padding-bottom': '20px'})
 ])
 
 ## update bar chart when changing Boroughs
@@ -420,8 +514,48 @@ def update_heatmap(weight, allday, borough, year, week, day):
         return fig, {'display': 'none'}, {'display': 'none'}
     else:
         return fig, {'display': 'block'}, {'display': 'block'}
-    
 
+# callback for pointmap
+@app.callback(
+    dash.dependencies.Output('pointmap-graph', 'figure'),
+    [dash.dependencies.Input('borough_pointmap', 'value'), 
+     dash.dependencies.Input('year_pointmap', 'value'), 
+     dash.dependencies.Input('week_pointmap', 'value'),
+     dash.dependencies.Input('day_pointmap', 'value'),
+     dash.dependencies.Input('type_input', 'value')])
+def update_pointmap(borough, year, week, day, street):
+    # if only one value chosen its just a string so we cast to array
+    if type(borough) == str:
+        borough = [borough]
+    if type(year) == str:
+        year= [year]
+    if type(week) == str:
+        week= [week]
+    if type(day) == str:
+        day= [day]
+
+    # if allday is chosen use whole data set else only corresponding hour
+
+    currDisplayData = heat_data_all_hours
+    
+    lat_lon_data=currDisplayData[(currDisplayData['BOROUGH'].isin(borough)) & (currDisplayData['Year'].isin(year)) & (currDisplayData['Week'].isin(week)) & (currDisplayData['WeekDay'].isin(day))]
+
+    # plot all lot, lon data from the current filters    
+    if lat_lon_data.shape[0] < 1:
+        fig = px.scatter_mapbox(lat=[0], lon=[0],
+                        center=dict(lat=40.7812, lon=-73.9665), zoom=10, opacity=0.0,
+                        mapbox_style="open-street-map", height=500)
+    else:
+        fig = px.scatter_mapbox(lat_lon_data, lat='LATITUDE', lon='LONGITUDE',
+                            center=dict(lat=40.7812, lon=-73.9665), zoom=10, opacity=0.8,
+                            mapbox_style="open-street-map", height=500)
+    
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    fig.update_traces(hovertemplate=None, hoverinfo='skip')
+    fig.update_layout(uirevision=True)
+
+
+    return fig
 
 #----------------run server-------------------#
 if __name__ == '__main__':
