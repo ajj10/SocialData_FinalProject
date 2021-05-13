@@ -231,7 +231,7 @@ app.layout = html.Div([
                 {'label': 'Saturday', 'value': '5'},
                 {'label': 'Sunday', 'value': '6'}
             ],
-            value='4',  
+            value=['0', '1', '2', '3', '4', '5','6'],  
             multi=True),
             style={'width': '25%',  'display': 'inline-block'}
         ),
