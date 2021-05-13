@@ -77,6 +77,8 @@ for i in range(0, len(hour_options)):
 # Data for all hours
 heat_data_all_hours = pd.concat(hour_options)
 
+print('heat_data_all_hour: ', heat_data_all_hours.shape)
+
 
 #------------------Dash app-----------------#
 app = dash.Dash(__name__)
@@ -537,8 +539,12 @@ def update_pointmap(borough, year, week, day, street):
     # if allday is chosen use whole data set else only corresponding hour
 
     currDisplayData = heat_data_all_hours
+
+    print('currDisplay: ', currDisplayData.shape)
     
     lat_lon_data=currDisplayData[(currDisplayData['BOROUGH'].isin(borough)) & (currDisplayData['Year'].isin(year)) & (currDisplayData['Week'].isin(week)) & (currDisplayData['WeekDay'].isin(day))]
+
+    print('lat_lon: ', lat_lon_data.shape)
 
     # plot all lot, lon data from the current filters    
     if lat_lon_data.shape[0] < 1:
