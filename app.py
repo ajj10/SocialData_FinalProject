@@ -77,8 +77,6 @@ for i in range(0, len(hour_options)):
 # Data for all hours
 heat_data_all_hours = pd.concat(hour_options)
 
-print('heat_data_all_hour: ', heat_data_all_hours.shape)
-
 
 #------------------Dash app-----------------#
 app = dash.Dash(__name__)
@@ -363,7 +361,7 @@ app.layout = html.Div([
             style={'width': '25%',  'display': 'inline-block'}
         ),
         html.Label(['Type a street name:'], style={'font-weight': 'bold',"text-align": "left", 'padding-right':'10px'}),
-        dcc.Input(id="type_input", type="text", placeholder="Type something...", style={'padding-top':'10px'})
+        dcc.Input(id="type_input", type="text", placeholder="Type something...", value='', style={'padding-top':'10px'}) #, debounce=True
     ], style={'margin-left': '10%', 
               'margin-right': '10%', 
               'padding-bottom':'20px'}),
@@ -540,11 +538,10 @@ def update_pointmap(borough, year, week, day, street):
 
     currDisplayData = heat_data_all_hours
 
-    print('currDisplay: ', currDisplayData.shape)
-    
-    lat_lon_data=currDisplayData[(currDisplayData['BOROUGH'].isin(borough)) & (currDisplayData['Year'].isin(year)) & (currDisplayData['Week'].isin(week)) & (currDisplayData['WeekDay'].isin(day))]
-
-    print('lat_lon: ', lat_lon_data.shape)
+    if street == '':
+        lat_lon_data=currDisplayData[(currDisplayData['BOROUGH'].isin(borough)) & (currDisplayData['Year'].isin(year)) & (currDisplayData['Week'].isin(week)) & (currDisplayData['WeekDay'].isin(day))]
+    else:
+        lat_lon_data=currDisplayData[(currDisplayData['BOROUGH'].isin(borough)) & (currDisplayData['Year'].isin(year)) & (currDisplayData['Week'].isin(week)) & (currDisplayData['WeekDay'].isin(day)) & currDisplayData['ON/CROSS STREET NAME'].str.contains(street.upper())]
 
     # plot all lot, lon data from the current filters    
     if lat_lon_data.shape[0] < 1:
