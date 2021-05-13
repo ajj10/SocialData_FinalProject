@@ -215,7 +215,7 @@ app.layout = html.Div([
                 'label': i,
                 'value': i
             } for i in week_options],
-            value='52',  
+            value=['1', '2','3', '4'],  
             multi=True),
             style={'width': '25%', 'display': 'inline-block'}
         ),
