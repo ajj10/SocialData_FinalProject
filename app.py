@@ -8,6 +8,7 @@ import plotly.graph_objs as go
 import plotly.express as px
 import warnings
 warnings.filterwarnings('ignore')
+import base64
 
 
 #-------------------Variables from json--------------#
@@ -23,6 +24,13 @@ contributing_factors_BROOKLYN_top7 = pd.read_json('data/contributing_factors_BRO
 contributing_factors_MANHATTAN_top7 = pd.read_json('data/contributing_factors_MANHATTAN_top7.json')
 contributing_factors_QUEENS_top7 = pd.read_json('data/contributing_factors_QUEENS_top7.json')
 contributing_factors_STATENISLAND_top7 = pd.read_json('data/contributing_factors_STATENISLAND_top7.json')
+
+
+visual = pd.read_json('data/visual.json')
+
+street_data_full = pd.read_json('data/street_data_full.json')
+
+frequent_collisions_2018 = pd.read_json('data/frequent_collisions_2018.json')
 
 heatmap_data_0 = pd.read_json('data/hours/heatmap_data_0.json')
 heatmap_data_1 = pd.read_json('data/hours/heatmap_data_1.json')
@@ -49,6 +57,12 @@ heatmap_data_21 = pd.read_json('data/hours/heatmap_data_21.json')
 heatmap_data_22 = pd.read_json('data/hours/heatmap_data_22.json')
 heatmap_data_23 = pd.read_json('data/hours/heatmap_data_23.json')
 
+image_filename = 'plot1.png' # replace with your own image
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+image_filename1 = 'plot2.png' # replace with your own image
+encoded_image1 = base64.b64encode(open(image_filename1, 'rb').read())
+image_filename2 = 'plot3.png' # replace with your own image
+encoded_image2 = base64.b64encode(open(image_filename2, 'rb').read())
 
 ## options
 hour_options = [heatmap_data_0,heatmap_data_1,heatmap_data_2,heatmap_data_3,heatmap_data_4,heatmap_data_5,heatmap_data_6,heatmap_data_7,heatmap_data_8,heatmap_data_9,heatmap_data_10,heatmap_data_11,heatmap_data_12,heatmap_data_13,heatmap_data_14,heatmap_data_15,heatmap_data_16,heatmap_data_17,heatmap_data_18,heatmap_data_19,heatmap_data_20,heatmap_data_21,heatmap_data_22,heatmap_data_23]
@@ -58,6 +72,7 @@ borough_options = ['BROOKLYN', 'BRONX', 'STATEN ISLAND', 'QUEENS', 'MANHATTAN']
 year_options = ['2013','2014','2015','2016','2017','2018','2019','2020','2021']
 week_options = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40','41','42','43','44','45','46','47','48','49','50','51','52','53']
 hour_marks = np.arange(0,24)
+street_options = street_data_full['ON STREET NAME'].unique()
 
 
 #Filtering 
@@ -77,6 +92,34 @@ for i in range(0, len(hour_options)):
 # Data for all hours
 heat_data_all_hours = pd.concat(hour_options)
 
+street_data_full['Year'] = street_data_full['Year'].astype('str')
+street_data_full['Hr'] = street_data_full['Hr'].astype('str')
+street_data_full['Week'] = street_data_full['Week'].astype('str')
+street_data_full['WeekDay'] = street_data_full['WeekDay'].astype('str')
+
+
+
+#figures
+img = 'plot1.png'
+fig1 = px.bar(visual, x="CONTRIBUTING FACTOR VEHICLE 1",y = "Accident_count", width=800, height=400,title="Top Contributing Factor for Accidents")
+fig1.update_layout(
+    yaxis_title="Number of Accidents",
+    xaxis_title="CONTRIBUTING FACTOR VEHICLE 1",
+    autosize=True,
+    width=600,
+    height=600,
+    )
+
+x_center=frequent_collisions_2018.LATITUDE.mean()
+y_center=frequent_collisions_2018.LONGITUDE.mean()
+fig2 = px.scatter_mapbox(frequent_collisions_2018, lat='LATITUDE', lon='LONGITUDE',
+                            center=dict(lat=x_center, lon=y_center), zoom=9, opacity=1.0,
+                            mapbox_style="open-street-map", height=500)
+
+fig2.update_traces(
+        text=frequent_collisions_2018[['0']],
+        hovertemplate='Accidents in 2018: %{text[0]}')
+
 
 #------------------Dash app-----------------#
 app = dash.Dash(__name__)
@@ -94,6 +137,46 @@ app.layout = html.Div([
                     'margin-right': 'auto', 
                     'padding-top': '20px', 
                     'padding-bottom': '20px'}),
+
+    # plot 1
+    html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), style={'margin-right':'auto', 
+                                                                                   'margin-left':'auto',
+                                                                                   'width':'50%',
+                                                                                   'display':'flex'}),
+
+    # some text (introduction)
+    html.Div(children='''
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
+        ''', style={'width': '80%',
+                    'margin-left': 'auto', 
+                    'margin-right': 'auto', 
+                    'padding-top': '20px', 
+                    'padding-bottom': '20px'}),
+
+    ## bokeh plot here
+
+
+    ## plot 2
+    html.Img(src='data:image/png;base64,{}'.format(encoded_image1.decode()), style={'margin-right':'auto', 
+                                                                                    'margin-left':'auto',
+                                                                                    'width':'50%',
+                                                                                    'display':'flex'}),
+
+    # some text (introduction)
+    html.Div(children='''
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
+        ''', style={'width': '80%',
+                    'margin-left': 'auto', 
+                    'margin-right': 'auto', 
+                    'padding-top': '20px', 
+                    'padding-bottom': '20px'}),
+
+
+    ## plot 3
+    html.Img(src='data:image/png;base64,{}'.format(encoded_image2.decode()), style={'margin-right':'auto', 
+                                                                                    'margin-left':'auto',
+                                                                                    'width':'50%',
+                                                                                    'display':'flex'}),
 
     # title for contributing factors bar chart
     html.H2('Collisions and their contributing factors', style={'text-align': 'center'}),
@@ -163,6 +246,20 @@ app.layout = html.Div([
                     'margin-right': 'auto', 
                     'padding-top': '20px', 
                     'padding-bottom': '20px'}),
+
+
+    # title for dangerous intersections
+    html.H2('Most dangerous intersections in 2018', style={'text-align': 'center'}),
+    
+    # most dangerous intersections
+    html.Div(dcc.Graph(
+        id='graph4',
+        figure=fig2,
+    ),  style={'width': '80%',
+              'margin-left': 'auto', 
+              'margin-right': 'auto', 
+              'padding-bottom':'20px'}),
+    
 
     # title for heatmap
     html.H2('Heat Map that shows collisions by time of day', style={'text-align': 'center'}),
@@ -382,7 +479,106 @@ app.layout = html.Div([
                     'margin-left': 'auto', 
                     'margin-right': 'auto', 
                     'padding-top': '20px', 
-                    'padding-bottom': '20px'})
+                    'padding-bottom': '20px'}), 
+    
+    # Looking at the different contributing factors of an accidents to find out the one causing the highest number of accidents
+    html.Div(dcc.Graph(
+        id='graph3',
+        figure=fig1,
+    ),  style={'width': '80%',
+               'margin-left':'30%',
+               'display': 'flex'}),
+
+
+    # some text
+    html.Div(children='''
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac.
+        ''', style={'width': '80%',
+                    'margin-left': 'auto', 
+                    'margin-right': 'auto', 
+                    'padding-top': '20px', 
+                    'padding-bottom': '20px'}),
+
+
+    #labels for drop down menus
+    html.Div(children=[
+        html.Div([
+            html.Label(['Select Borough'], style={'font-weight': 'bold', "text-align": "right"}),
+        ], style={'width': '25%', 'display': 'inline-flex', 'justify-content':'center'}),
+        html.Div([
+            html.Label(['Select Year'], style={'font-weight': 'bold', "text-align": "center"}),
+        ], style={'width': '25%', 'display': 'inline-flex', 'justify-content':'center'}),
+        html.Div([
+            html.Label(['Select Week'], style={'font-weight': 'bold', "text-align": "center"}),
+        ], style={'width': '25%', 'display': 'inline-flex', 'justify-content':'center'}),
+        html.Div([
+            html.Label(['Select Weekday'], style={'font-weight': 'bold',"text-align": "left"}),
+        ], style={'width': '25%', 'display': 'inline-flex', 'justify-content':'center'}),
+    ],style={'margin-left': '10%','margin-right': '10%'}),
+
+
+    #Dropdown menus for point map with street names
+    html.Div(children=[
+        #Dropdown menu for street Name
+        html.Div(dcc.Dropdown(
+            id='street_input',
+            options=[{
+                'label': i,
+                'value': i
+            } for i in street_options],
+            value='BROADWAY'
+            ),
+            style={'width': '25%',  'display': 'inline-block'}
+        ),
+        #Dropdown menu for year
+        html.Div(dcc.Dropdown(
+            id='year_pointmap1',
+            options=[{
+                'label': i,
+                'value': i
+            } for i in year_options],
+            value='2019',  
+            multi=True),
+            style={'width': '25%', 'display': 'inline-block'}
+        ),
+        #Dropdown menu for Week
+        html.Div(dcc.Dropdown(
+            id='week_pointmap1',
+            options=[{
+                'label': i,
+                'value': i
+            } for i in week_options],
+            value=['1', '2','3', '4', '5', '6','7', '8','9', '10','11', '12',],  
+            multi=True),
+            style={'width': '25%', 'display': 'inline-block'}
+        ),
+        #Dropdown menu for weekday
+        html.Div(dcc.Dropdown(
+            id='day_pointmap1',
+            options=[
+                {'label': 'Monday', 'value': '0'},
+                {'label': 'Tuesday', 'value': '1'},
+                {'label': 'Wednesday', 'value': '2'},
+                {'label': 'Thursday', 'value': '3'},
+                {'label': 'Friday', 'value': '4'},
+                {'label': 'Saturday', 'value': '5'},
+                {'label': 'Sunday', 'value': '6'}
+            ],
+            value=['0', '1', '2', '3', '4', '5','6'],  
+            multi=True),
+            style={'width': '25%',  'display': 'inline-block'}
+        ),        
+    ], style={'margin-left': '10%', 
+              'margin-right': '10%', 
+              'padding-bottom':'20px'}),
+
+    # Pointmap
+    html.Div(dcc.Graph(
+        id='pointmap-graph1',
+    ), style={'width': '80%',
+              'margin-left': 'auto', 
+              'margin-right': 'auto', 
+              'padding-bottom':'20px'})
 ])
 
 ## update bar chart when changing Boroughs
@@ -534,6 +730,7 @@ def update_pointmap(borough, year, week, day, street):
     if type(day) == str:
         day= [day]
 
+
     # if allday is chosen use whole data set else only corresponding hour
 
     currDisplayData = heat_data_all_hours
@@ -556,6 +753,56 @@ def update_pointmap(borough, year, week, day, street):
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     fig.update_traces(hovertemplate=None, hoverinfo='skip')
     fig.update_layout(uirevision=True)
+
+
+    return fig
+
+# callback for pointmap with streets
+@app.callback(
+    dash.dependencies.Output('pointmap-graph1', 'figure'),
+    [dash.dependencies.Input('year_pointmap1', 'value'), 
+     dash.dependencies.Input('week_pointmap1', 'value'),
+     dash.dependencies.Input('day_pointmap1', 'value'),
+     dash.dependencies.Input('street_input', 'value')])
+def update_pointmap1(year, week, day, street):
+    # if only one value chosen its just a string so we cast to array
+    if type(year) == str:
+        year= [year]
+    if type(week) == str:
+        week= [week]
+    if type(day) == str:
+        day= [day]
+    if type(street) == str:
+        street= [street]
+
+    # if allday is chosen use whole data set else only corresponding hour
+
+    currDisplayData = street_data_full
+
+    lat_lon_data=currDisplayData[(currDisplayData['Year'].isin(year)) & (currDisplayData['Week'].isin(week)) & (currDisplayData['WeekDay'].isin(day)) & currDisplayData['ON STREET NAME'].isin(street)]
+
+    x_map=lat_lon_data.LATITUDE.mean()
+    y_map=lat_lon_data.LONGITUDE.mean()
+
+    # plot all lot, lon data from the current filters    
+    if lat_lon_data.shape[0] < 1:
+        fig = px.scatter_mapbox(lat=[0], lon=[0],
+                        center=dict(lat=40.7812, lon=-73.9665), zoom=10, opacity=0.0,
+                        mapbox_style="open-street-map", height=500)
+    else:
+        fig = px.scatter_mapbox(lat_lon_data, lat='LATITUDE', lon='LONGITUDE',
+                            center=dict(lat=x_map, lon=y_map), zoom=10, opacity=0.8,
+                            mapbox_style="open-street-map", height=500)
+    
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    #fig.update_traces(hovertemplate=None, hoverinfo='skip')
+    fig.update_traces(
+        text=lat_lon_data[['Accident_Type', 'VEHICLE TYPE CODE 1']],
+        customdata=lat_lon_data[['NUMBER_OF_PERSONS_INJURED', 'NUMBER_OF_PERSONS_KILLED']],
+        hovertemplate='Accident Type: %{text[0]} <br> Type of Vehicle 1: %{text[1]} <br> Injured:  %{customdata[0]} <br> Injured:  %{customdata[1]}')
+    fig.update_layout(uirevision=True)
+
+    #d.apply(lambda row: folium.CircleMarker(location=[row['LATITUDE'], row['LONGITUDE']],popup = 'Accident Type: ' + row.loc['Accident_Type']  + ', Type of Vehicle 1: ' + row.loc['VEHICLE TYPE CODE 1'] + ', Injured = ' + row.loc['NUMBER_OF_PERSONS_INJURED'] + ', Killed = ' + row.loc['NUMBER_OF_PERSONS_KILLED'],radius = 3, fill = True, fill_opacity=1).add_to(map_ny), axis=1)
 
 
     return fig
