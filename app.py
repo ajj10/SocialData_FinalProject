@@ -10,6 +10,8 @@ import warnings
 warnings.filterwarnings('ignore')
 import base64
 
+import json
+
 
 #-------------------Variables from json--------------#
 contributing_factors_ALL_top = pd.read_json('data/contributing_factors_ALL_top.json')
@@ -31,6 +33,8 @@ visual = pd.read_json('data/visual.json')
 street_data_full = pd.read_json('data/street_data_full.json')
 
 frequent_collisions_2018 = pd.read_json('data/frequent_collisions_2018.json')
+
+chloropleth = pd.read_json('data/chloropleth.json')
 
 heatmap_data_0 = pd.read_json('data/hours/heatmap_data_0.json')
 heatmap_data_1 = pd.read_json('data/hours/heatmap_data_1.json')
@@ -119,19 +123,67 @@ fig2 = px.scatter_mapbox(frequent_collisions_2018, lat='LATITUDE', lon='LONGITUD
 fig2.update_traces(
         text=frequent_collisions_2018[['0']],
         hovertemplate='Accidents in 2018: %{text[0]}')
+fig2.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+temp1 = chloropleth.iloc[0].copy()
+temp2 = chloropleth.iloc[1].copy()
+temp3 = chloropleth.iloc[2].copy()
+temp4 = chloropleth.iloc[3].copy()
+temp5 = chloropleth.iloc[4].copy()
+chloropleth.iloc[0] = temp5
+chloropleth.iloc[1] = temp4
+chloropleth.iloc[2] = temp2
+chloropleth.iloc[3] = temp3
+chloropleth.iloc[4] = temp1
+
+
+nycmap = json.load(open("data/boroughs.geojson"))
+# create new columns in df for area and density  
+
+# call Plotly Express choropleth function to visualize data
+fig3 = px.choropleth_mapbox(chloropleth,
+                           geojson=nycmap,
+                           locations=chloropleth.index,
+                           color='Accident/Square Km',
+                           color_continuous_scale="Reds",
+                           mapbox_style="open-street-map",
+                           zoom=9, center={"lat": 40.7, "lon": -73.9},
+                           opacity=0.7,
+                           hover_name="BOROUGH"
+                           )
+
+fig3.update_traces(
+        text=chloropleth[['BOROUGH','Accident/Square Km']],
+        hovertemplate='Borough: %{text[0]} <br> Accident/Square Km: %{text[1]}')
+fig3.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
 
 #------------------Dash app-----------------#
 app = dash.Dash(__name__)
 server = app.server
 
-app.layout = html.Div([
-    # header of page
-    html.H1('Vehicle Collisions in New York City', style={'text-align': 'center'}),
+colors = {
+    'background': '#b4e6ed',
+    'text': '#111111'
+}
+
+
+app.layout = html.Div(style={ 'font-family':'Sans-Serif',
+                             'color': colors['text'],  
+                             'width':'80%', 'height':'100%', 
+                             'margin-left':'auto',
+                             'margin-right':'auto',
+                            }, 
+    children=[
+
     
+    # header of page
+    html.H1('Vehicle Collisions in New York City', style={'text-align': 'center',
+                                                            'background': colors['background']}),
+
     # some text (introduction)
-    html.Div(children='''
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
+    dcc.Markdown(children='''
+            This webpage gives you a visual experience of the collisions in the city of New York. There is a mix of a plethora of different analytic and interactive visualizations giving you  interesting insights as well as a lot of possibilities to explore the dataset for yourself.
         ''', style={'width': '80%',
                     'margin-left': 'auto', 
                     'margin-right': 'auto', 
@@ -141,11 +193,11 @@ app.layout = html.Div([
     # plot 1
     html.Img(src='data:image/png;base64,{}'.format(encoded_image.decode()), style={'margin-right':'auto', 
                                                                                    'margin-left':'auto',
-                                                                                   'width':'50%',
+                                                                                   'width':'60%',
                                                                                    'display':'flex'}),
 
     # some text (introduction)
-    html.Div(children='''
+    dcc.Markdown(children='''
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
         ''', style={'width': '80%',
                     'margin-left': 'auto', 
@@ -154,16 +206,22 @@ app.layout = html.Div([
                     'padding-bottom': '20px'}),
 
     ## bokeh plot here
+    html.Iframe(src="https://www.student.dtu.dk/~s202094/bokeh/plot.html",
+                style={"width": "1000px",
+                        "height": "600px",
+                        'margin-left': 'auto',
+                        'margin-right': 'auto',
+                        'display':'block'}),
 
 
     ## plot 2
     html.Img(src='data:image/png;base64,{}'.format(encoded_image1.decode()), style={'margin-right':'auto', 
                                                                                     'margin-left':'auto',
-                                                                                    'width':'50%',
+                                                                                    'width':'60%',
                                                                                     'display':'flex'}),
 
     # some text (introduction)
-    html.Div(children='''
+    dcc.Markdown(children='''
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
         ''', style={'width': '80%',
                     'margin-left': 'auto', 
@@ -175,15 +233,17 @@ app.layout = html.Div([
     ## plot 3
     html.Img(src='data:image/png;base64,{}'.format(encoded_image2.decode()), style={'margin-right':'auto', 
                                                                                     'margin-left':'auto',
-                                                                                    'width':'50%',
+                                                                                    'width':'60%',
                                                                                     'display':'flex'}),
 
     # title for contributing factors bar chart
-    html.H2('Collisions and their contributing factors', style={'text-align': 'center'}),
+    html.H2('Collisions and their contributing factors', style={'text-align': 'center',
+                                                                'padding-top': '50px'}),
 
     # some text
-    html.Div(children='''
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac.
+    dcc.Markdown(children='''
+        New York is divided into 5 Boroughs. Each one of them is very different in terms of their area, population density and “purpose”. So, each Borough is also very different when it comes to motor vehicle collisions. Through an interactive visualization, you can select a particular Borough and look at the number of collisions as well as the injuries and deaths across all the different reasons for a collision.
+        For all Boroughs, speeding violations result in the highest number fatalities even though the number of collisions due to it are relatively low. Even Driver Inattention which has by far the highest number of collisions (6 times more than over speeding), has lower number of deaths. So, a very strict curb on speeding is definitely impending.
         ''', style={'width': '80%',
                     'margin-left': 'auto', 
                     'margin-right': 'auto', 
@@ -210,9 +270,8 @@ app.layout = html.Div([
                 'position': 'relative'}),
     
     # some text
-    html.Div(children='''
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
-        Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et malesuada justo. Ut bibendum lacinia luctus. Ut accumsan ex eu enim sagittis, nec sollicitudin mauris porttitor. Sed maximus neque id magna cursus, et varius purus sagittis. Fusce dolor ligula, pretium posuere urna eu, ullamcorper semper elit. Morbi elementum sagittis tortor, ut blandit ante rhoncus at. Ut porttitor eu dui nec iaculis. Maecenas ut sem a sapien maximus semper. Suspendisse massa urna, cursus vitae euismod non, dapibus id eros. Duis quis nisl ac sem condimentum tincidunt et vitae odio. Nam ut gravida eros. Donec molestie, justo et auctor fermentum, ipsum erat mattis velit, id tempor ipsum libero non ligula.
+    dcc.Markdown(children='''
+        Looking closer at collisions, injuries and deaths for the top 7 reasons for collisions we can see how it is distributed across each borough.
         ''', style={'width': '80%',
                     'margin-left': 'auto', 
                     'margin-right': 'auto', 
@@ -238,13 +297,57 @@ app.layout = html.Div([
                 'margin-right': 'auto',
                 'position': 'relative'}),
     
+
+    # title for contributing factors bar chart
+    html.H2('Geographical Analysis', style={'text-align': 'center',
+                                            'padding-top': '50px'}),
+
+    
     # some text
-    html.Div(children='''
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac.
-        ''', style={'width': '80%',
+    dcc.Markdown(children='''
+        The idea is to give you different geographical visualizations to be able to see and understand Motor Vehicle Collisions in the city of New York. Starting from the bird eye's view and narrowing it down to the very latitude and longitude of any collision, also giving the user the options to filter the visuals by Year, Week, Day and even the hour.        
+        <br>
+        Following 2 visuals were built to give you an idea of the power of seeing geographical data on the map.''', style={'width': '80%',
                     'margin-left': 'auto', 
                     'margin-right': 'auto', 
                     'padding-top': '20px', 
+                    'padding-bottom': '20px'}),
+
+    html.H3('Collisions per square Km (2019)', style={'text-align': 'center'}),
+
+     # some text
+    dcc.Markdown(children='''
+        The previous bar graph which compares the collisions across Boroughs does not paint the complete picture as the area of these Boroughs is very different. So, we look collision per square Km in this chloropleth below.        ''', style={'width': '80%',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
+                    'padding-bottom': '20px'}),
+
+    # chloropleth
+    html.Div(dcc.Graph(
+        id='graph5',
+        figure=fig3,
+    ),  style={'width': '80%',
+              'margin-left': 'auto', 
+              'margin-right': 'auto', 
+              'padding-bottom':'20px'}),
+
+    # some text
+    dcc.Markdown(children='''
+        As expected, Manhattan (often refered to as the centre of the modern world) is the most dangerous areas when it comes to driving in the city of New York followed by Brooklyn and then Bronx. Brooklyn though, has the highest number of accidents.        '''
+        , style={'width': '80%',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
+                    'padding-bottom': '20px'}),
+
+    # some text
+    dcc.Markdown(children='''
+        The following graph reveals top 100 locations with the highest number of collisions in the city of New York..
+        ''', style={'width': '80%',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
                     'padding-bottom': '20px'}),
 
 
@@ -259,10 +362,28 @@ app.layout = html.Div([
               'margin-left': 'auto', 
               'margin-right': 'auto', 
               'padding-bottom':'20px'}),
-    
 
+    # some text
+    dcc.Markdown(children='''
+        Now, its time for you to leverage this power. Following series of interactive geographical visualizations will enable you to do all kinds of adhoc analysis by yourself.
+        ''', style={'width': '80%',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
+                    'padding-bottom': '20px'}),
+    
     # title for heatmap
-    html.H2('Heat Map that shows collisions by time of day', style={'text-align': 'center'}),
+    html.H3('Heat Map', style={'text-align': 'center'}),
+
+     # some text
+    dcc.Markdown(children='''
+        Having had a bird view of the data, its time to get hands dirty. Looking at a heat map of the collisions with the option to filter a borough, an year and even the week. Furthermore, you can also slide through the hours of the day to at the changing accident density across the day.
+        So, you can just filter a Borough, the year, week and even the day to look at the hotspots for collisions and take necessary measures.
+        ''', style={'width': '80%',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
+                    'padding-bottom': '20px'}),
     
     #labels for drop down menus
     html.Div(children=[
@@ -376,15 +497,17 @@ app.layout = html.Div([
             html.Label(['Select Hour of day'], style={'font-weight': 'bold', "text-align": "right"}),
         ], style={'width': '90%', 'display': 'inline-flex', 'justify-content':'center'}),
     ],style={'margin-left': '20%','margin-right': '10%'}),
+
+
+    # title for Latitude Longitude Marker
+    html.H3('Latitude Longitude Marker', style={'text-align': 'center','padding-top': '30px',}),
     
     # Some text
-    html.Div(children='''
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
-        Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et malesuada justo. Ut bibendum lacinia luctus. Ut accumsan ex eu enim sagittis, nec sollicitudin mauris porttitor. Sed maximus neque id magna cursus, et varius purus sagittis. Fusce dolor ligula, pretium posuere urna eu, ullamcorper semper elit. Morbi elementum sagittis tortor, ut blandit ante rhoncus at. Ut porttitor eu dui nec iaculis. Maecenas ut sem a sapien maximus semper. Suspendisse massa urna, cursus vitae euismod non, dapibus id eros. Duis quis nisl ac sem condimentum tincidunt et vitae odio. Nam ut gravida eros. Donec molestie, justo et auctor fermentum, ipsum erat mattis velit, id tempor ipsum libero non ligula.
-        ''', style={'width': '80%',
-                    'margin-left': 'auto', 
-                    'margin-right': 'auto', 
-                    'padding-top': '20px', 
+    dcc.Markdown(children='''
+        Now, that you have an even better idea of what is going in the different Boroughs across different time periods, its time for the last straw of the geogrphic Visualizations.        ''', style={'width': '80%',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
                     'padding-bottom': '20px'}),
     
 
@@ -472,31 +595,24 @@ app.layout = html.Div([
               'padding-bottom':'20px'}),
 
     # Some text
-    html.Div(children='''
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac. Mauris nec velit diam. Vivamus nec vestibulum augue. Aliquam et feugiat dui. Integer id dui venenatis, tristique ipsum vel, dapibus turpis.
-        Donec quis imperdiet tellus, nec semper turpis. Praesent a hendrerit mauris, et malesuada justo. Ut bibendum lacinia luctus. Ut accumsan ex eu enim sagittis, nec sollicitudin mauris porttitor. Sed maximus neque id magna cursus, et varius purus sagittis. Fusce dolor ligula, pretium posuere urna eu, ullamcorper semper elit. Morbi elementum sagittis tortor, ut blandit ante rhoncus at. Ut porttitor eu dui nec iaculis. Maecenas ut sem a sapien maximus semper. Suspendisse massa urna, cursus vitae euismod non, dapibus id eros. Duis quis nisl ac sem condimentum tincidunt et vitae odio. Nam ut gravida eros. Donec molestie, justo et auctor fermentum, ipsum erat mattis velit, id tempor ipsum libero non ligula.
+    dcc.Markdown(children='''
+        Along with the above filters, the user will now be able see the exact location of the accident on the map. The marker, when clicked would also provide additional valuable information about the collision.
         ''', style={'width': '80%',
-                    'margin-left': 'auto', 
-                    'margin-right': 'auto', 
-                    'padding-top': '20px', 
-                    'padding-bottom': '20px'}), 
-    
-    # Looking at the different contributing factors of an accidents to find out the one causing the highest number of accidents
-    html.Div(dcc.Graph(
-        id='graph3',
-        figure=fig1,
-    ),  style={'width': '80%',
-               'margin-left':'30%',
-               'display': 'flex'}),
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
+                    'padding-bottom': '20px'}),
 
+    # title for Failure to Yield Intersections
+    html.H3('Latitude Longitude Marker', style={'text-align': 'center'}),
 
     # some text
-    html.Div(children='''
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in vehicula ex, ut hendrerit erat. Nulla facilisi. Etiam maximus, elit et interdum ultrices, dui orci facilisis mauris, sed auctor lorem metus eu risus. Vestibulum accumsan sagittis odio, id sodales turpis tincidunt ac. Maecenas erat erat, suscipit eu erat eu, blandit egestas dolor. Nulla euismod sapien vitae eleifend auctor. Nunc aliquet mollis tortor, in placerat eros vulputate ac.
+    dcc.Markdown(children='''
+        Driver Inattention/Distraction is ofcourse the number one reason for accidents (Phone calls, food and what not). What is interesting is to look at the second highest reason for accidents i.e. 'Failure to Yield Right-of-Way'As the 'Failure to Yield Right-of-Way' mostly happen at the intersections, it would be interesting to see the top 50 streets with the highest number of such accidents geographically on the map.
         ''', style={'width': '80%',
-                    'margin-left': 'auto', 
-                    'margin-right': 'auto', 
-                    'padding-top': '20px', 
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
                     'padding-bottom': '20px'}),
 
 
@@ -578,8 +694,18 @@ app.layout = html.Div([
     ), style={'width': '80%',
               'margin-left': 'auto', 
               'margin-right': 'auto', 
-              'padding-bottom':'20px'})
+              'padding-bottom':'20px'}),
+
+    # some text
+    dcc.Markdown(children='''
+        Investigating this map, you can find out the crossing with the highest number of accidents and measures are needed to fix them
+        ''', style={'width': '80%',
+                    'margin-left': 'auto',
+                    'margin-right': 'auto',
+                    'padding-top': '20px',
+                    'padding-bottom': '20px'}),
 ])
+
 
 ## update bar chart when changing Boroughs
 @app.callback(
